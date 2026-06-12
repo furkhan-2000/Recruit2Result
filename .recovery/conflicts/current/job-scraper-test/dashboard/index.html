@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI OS Jobs</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">AI OS Job Portal</p>
+        <h1>Live job intelligence board</h1>
+      </div>
+      <button id="scrapeButton" class="primary-button" type="button">
+        <span aria-hidden="true">↻</span>
+        Refresh jobs
+      </button>
+    </header>
+
+    <main>
+      <section class="metrics" aria-label="Job metrics">
+        <article>
+          <span id="totalJobs">0</span>
+          <p>Total jobs</p>
+        </article>
+        <article>
+          <span id="remoteJobs">0</span>
+          <p>Remote roles</p>
+        </article>
+        <article>
+          <span id="sourceCount">0</span>
+          <p>Sources</p>
+        </article>
+        <article>
+          <span id="lastUpdated">Never</span>
+          <p>Last updated</p>
+        </article>
+      </section>
+
+      <section class="toolbar" aria-label="Job filters">
+        <label>
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Title, company, skill, location" />
+        </label>
+        <label>
+          <span>Source</span>
+          <select id="sourceSelect">
+            <option value="">All sources</option>
+          </select>
+        </label>
+        <label class="toggle">
+          <input id="remoteOnly" type="checkbox" />
+          <span>Remote only</span>
+        </label>
+      </section>
+
+      <section class="status-line" aria-live="polite">
+        <span id="statusText">Loading jobs...</span>
+      </section>
+
+      <section id="jobList" class="job-list" aria-label="Job results"></section>
+    </main>
+
+    <template id="jobCardTemplate">
+      <article class="job-card">
+        <div class="job-card__main">
+          <div>
+            <p class="job-source"></p>
+            <h2></h2>
+            <p class="company"></p>
+          </div>
+          <a class="apply-link" target="_blank" rel="noopener noreferrer">Apply</a>
+        </div>
+        <p class="description"></p>
+        <div class="job-meta"></div>
+        <div class="tag-list"></div>
+      </article>
+    </template>
+
+    <script src="/src/app.js" defer></script>
+  </body>
+</html>

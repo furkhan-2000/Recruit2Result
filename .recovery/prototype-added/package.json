@@ -1,0 +1,15 @@
+{
+  "name": "ai-os-job-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent-ready job portal that aggregates jobs from configurable public sources.",
+  "scripts": {
+    "start": "node job-scraper-test/server/index.js",
+    "dev": "node job-scraper-test/server/index.js",
+    "scrape": "node job-scraper-test/scripts/scrape.js",
+    "health": "node job-scraper-test/scripts/health-check.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
