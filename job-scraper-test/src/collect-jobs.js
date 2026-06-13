@@ -5,6 +5,7 @@ import { dirname } from "path";
 import { launchBrowser, newPage, goto, sleep } from "./browser.js";
 import { detectBlock } from "./detect-block.js";
 import { checkProxyEgress } from "./nodemaven-proxy.js";
+import { scoreJob } from "./ai-intelligence.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const screenshotsDir = join(__dirname, "..", "output", "screenshots");
@@ -168,6 +169,7 @@ export async function collectJobs({
         if (seen.has(key)) continue;
         seen.add(key);
 
+        const qualityScore = await scoreJob(raw);
         const job = {
           id: collected.length + 1,
           site,
@@ -175,6 +177,7 @@ export async function collectJobs({
           company: raw.company,
           location: raw.location ?? null,
           url: raw.url,
+          qualityScore,
           collectedAt: new Date().toISOString(),
         };
         collected.push(job);
@@ -224,6 +227,7 @@ export async function collectJobs({
             const key = jobKey(raw);
             if (seen.has(key)) continue;
             seen.add(key);
+            const qualityScore = await scoreJob(raw);
             const job = {
               id: collected.length + 1,
               site,
@@ -231,6 +235,7 @@ export async function collectJobs({
               company: raw.company,
               location: raw.location ?? null,
               url: raw.url,
+              qualityScore,
               collectedAt: new Date().toISOString(),
             };
             collected.push(job);
@@ -279,6 +284,7 @@ export async function collectJobs({
             const key = jobKey(raw);
             if (seen.has(key)) continue;
             seen.add(key);
+            const qualityScore = await scoreJob(raw);
             const job = {
               id: collected.length + 1,
               site,
@@ -286,6 +292,7 @@ export async function collectJobs({
               company: raw.company,
               location: raw.location ?? null,
               url: raw.url,
+              qualityScore,
               collectedAt: new Date().toISOString(),
             };
             collected.push(job);

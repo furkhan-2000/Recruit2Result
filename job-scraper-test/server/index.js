@@ -26,6 +26,7 @@ import {
   indexExtractionRun,
 } from "../src/job-intelligence-store.js";
 import { buildRunSummary } from "../src/run-summary.js";
+import { autoBridgeToHR } from "../src/workflow-manager.js";
 import {
   loadProxyEnv,
   isProxyConfigured,
@@ -236,6 +237,21 @@ app.get("/api/jobs/export", (req, res) => {
 
 app.get("/api/source-health", (_req, res) => {
   res.json(getSourceHealth());
+});
+
+app.post("/api/workflow/bridge-hr", async (req, res) => {
+  const { job } = req.body;
+  if (!job) return res.status(400).json({ error: "Missing job data" });
+
+  const logs = [];
+  const pushLog = (level, text, detail) => logs.push({ level, text, detail, t: new Date().toISOString() });
+
+  try {
+    const results = await autoBridgeToHR(job, pushLog);
+    res.json({ success: true, results, logs });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message, logs });
+  }
 });
 
 app.get("/api/extract/stream", async (req, res) => {
