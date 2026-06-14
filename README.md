@@ -145,23 +145,35 @@ npm start
 - **NodeMaven API key** (optional) — for proxy-enabled apps when scaling beyond local IP limits
 
 ---
+## Security & Secret Management (Production Ready)
+
+This application is designed for enterprise-grade security. Secrets are kept **indirectly**, never directly inside the application code or configuration.
+
+**Production Workflow:**
+1.  **OCI Vault** stores the API keys (Groq, NodeMaven, etc.) securely as the source-of-truth.
+2.  **Kubernetes (K8s)** pulls those secrets from the Vault into a **K8s Secret**.
+3.  **The Backend** receives these secrets injected as environment variables at runtime.
+
+This pattern isolates storage, access, rotation, and runtime usage cleanly. It ensures that keys are never exposed in code, Git, or ConfigMaps. The backend never talks to Vault directly and never sees Vault OCIDs, maintaining a strict security boundary.
+
+---
 
 ## Environment variables
 
-Each app ships with a `.env.example`. Copy it to `.env` and fill in only what you need.
+The app is entirely environment-driven. In production, these should be injected via K8s Secrets or your CI/CD pipeline.
 
-| Variable | Apps | Local dev | Production |
-|----------|------|-----------|------------|
-| `NODEMAVEN_API_KEY` | Search, Maps, Download, Job | Optional | Recommended at scale |
-| `LINKEDIN_LI_AT` | HR Finding | Optional | Optional |
-| `HEADLESS` | All | `true` (default) | `true` |
-| `PORT` | All | Per-app default | Set per deployment |
-| `NODE_ENV` | All | **Leave unset** | `production` |
-| `HOST` | All | **Leave unset** | `0.0.0.0` |
-
-**Local tip:** Do not copy `NODE_ENV=production` into your local `.env` — the apps default to `127.0.0.1` and enable CORS for Vite dev mode automatically.
+| Variable | Purpose | Injection Source |
+|----------|---------|------------------|
+| `GROQ_API_KEY` | AI Intelligence (gpt-oss-120b) | OCI Vault → K8s Secret |
+| `NODEMAVEN_API_KEY` | Residential Proxy Rotation | OCI Vault → K8s Secret |
+| `PORT` | App Port (Default 3847) | Deployment Manifest |
+| `NODE_ENV` | Set to `production` | Deployment Manifest |
 
 ---
+
+## Responsible use
+
+These tools automate browser interactions with third-party websites. Before using them in production or at scale:
 
 ## NodeMaven proxy — use in this repo or your own project
 

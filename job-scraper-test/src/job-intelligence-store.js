@@ -155,7 +155,9 @@ export function normalizeJob(raw, run = {}) {
     location,
     remote: isRemote(location, title),
     url,
-    qualityScore: scoreJob({ title, company, location, url }),
+    qualityScore: localScoreJob({ title, company, location, url }),
+    aiScore: null,
+    aiReason: null,
     collectedAt: normalizeDate(raw.collectedAt) || new Date().toISOString(),
     postedAt: normalizeDate(raw.postedAt) || null,
     keywords: runKeywords ? unique(runKeywords.split(/\s+/).filter(Boolean)) : [],
@@ -246,7 +248,7 @@ function updateSourceHealth(run, jobs) {
   atomicWriteJson(sourceHealthPath, health);
 }
 
-function scoreJob(job) {
+function localScoreJob(job) {
   let score = 40;
   if (job.title) score += 15;
   if (job.company) score += 15;

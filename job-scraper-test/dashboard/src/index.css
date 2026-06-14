@@ -1274,3 +1274,84 @@ tr:hover td {
 .outcome-tag.error {
   color: var(--danger);
 }
+
+/* AI Intelligence Dashboard Styles */
+.ai-score-pill {
+  background: #2563eb;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.local-score-pill {
+  background: #64748b;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.reason-cell {
+  max-width: 300px;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.score-area {
+  margin-top: 12px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.ai-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ai-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.ai-score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.ai-reason {
+  font-size: 0.85rem;
+  color: #334155;
+  font-style: italic;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.local-insight {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.local-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.local-score {
+  font-weight: bold;
+}

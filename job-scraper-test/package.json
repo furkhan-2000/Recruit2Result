@@ -20,6 +20,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "groq-sdk": "^1.2.1",
+    "p-retry": "^8.0.0",
     "puppeteer": "^24.2.0"
   },
   "devDependencies": {

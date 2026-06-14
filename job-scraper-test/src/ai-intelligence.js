@@ -1,33 +1,69 @@
 /**
  * AI Intelligence Module for AiJobs
- * Handles job matching, scoring, and automated outreach generation.
+ * Handles job matching, scoring, and automated outreach generation using Groq.
  */
 
-import { loadProxyEnv } from "./nodemaven-proxy.js";
-loadProxyEnv();
+import { callGroq } from "./groq-service.js";
+import { optimizeText, shouldInvokeAI, getMinifiedSystemPrompt } from "./token-utils.js";
+import { hasSecret } from "./secrets-manager.js";
 
 const AI_CONFIG = {
-  geminiKey: process.env.GEMINI_API_KEY,
-  openaiKey: process.env.OPENAI_API_KEY,
-  anthropicKey: process.env.ANTHROPIC_API_KEY,
+  hasGroq: hasSecret("GROQ_API_KEY"),
 };
 
 /**
- * Mock AI Scoring (can be extended to use real LLMs)
+ * Intelligent Job Scoring using Groq (gpt-oss-120b)
  */
 export async function scoreJob(job, resumeKeywords = []) {
-  if (!resumeKeywords.length) return 50; // Default middle score
-
+  // 1. Local Pre-Score (Zero-Token Guard)
   const text = `${job.title} ${job.company} ${job.description ?? ""}`.toLowerCase();
-  let score = 0;
+  let localScore = 0;
   
-  for (const kw of resumeKeywords) {
-    if (text.includes(kw.toLowerCase())) {
-      score += 10;
+  if (resumeKeywords.length) {
+    for (const kw of resumeKeywords) {
+      if (text.includes(kw.toLowerCase())) {
+        localScore += 10;
+      }
+    }
+  } else {
+    localScore = 50; // Neutral fallback
+  }
+
+  const result = {
+    localScore: Math.min(100, localScore),
+    aiScore: null,
+    aiReason: null,
+  };
+
+  // 2. AI Scoring (Only if local score is high enough)
+  if (AI_CONFIG.hasGroq && shouldInvokeAI(result.localScore)) {
+    const cleanDescription = optimizeText(job.description);
+    
+    const messages = [
+      { role: "system", content: getMinifiedSystemPrompt() },
+      { 
+        role: "user", 
+        content: JSON.stringify({
+          job: { title: job.title, desc: cleanDescription },
+          resume: resumeKeywords.join(", ")
+        })
+      }
+    ];
+
+    const aiResponse = await callGroq(messages);
+    
+    if (aiResponse) {
+      try {
+        const parsed = JSON.parse(aiResponse);
+        result.aiScore = parsed.score;
+        result.aiReason = parsed.reason;
+      } catch (e) {
+        console.error("Failed to parse AI response:", e.message);
+      }
     }
   }
 
-  return Math.min(100, score);
+  return result;
 }
 
 /**

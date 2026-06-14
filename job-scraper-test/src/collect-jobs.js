@@ -169,7 +169,7 @@ export async function collectJobs({
         if (seen.has(key)) continue;
         seen.add(key);
 
-        const qualityScore = await scoreJob(raw);
+        const scores = await scoreJob(raw);
         const job = {
           id: collected.length + 1,
           site,
@@ -177,7 +177,9 @@ export async function collectJobs({
           company: raw.company,
           location: raw.location ?? null,
           url: raw.url,
-          qualityScore,
+          qualityScore: scores.localScore,
+          aiScore: scores.aiScore,
+          aiReason: scores.aiReason,
           collectedAt: new Date().toISOString(),
         };
         collected.push(job);
@@ -227,7 +229,7 @@ export async function collectJobs({
             const key = jobKey(raw);
             if (seen.has(key)) continue;
             seen.add(key);
-            const qualityScore = await scoreJob(raw);
+            const scores = await scoreJob(raw);
             const job = {
               id: collected.length + 1,
               site,
@@ -235,7 +237,9 @@ export async function collectJobs({
               company: raw.company,
               location: raw.location ?? null,
               url: raw.url,
-              qualityScore,
+              qualityScore: scores.localScore,
+              aiScore: scores.aiScore,
+              aiReason: scores.aiReason,
               collectedAt: new Date().toISOString(),
             };
             collected.push(job);
@@ -284,7 +288,7 @@ export async function collectJobs({
             const key = jobKey(raw);
             if (seen.has(key)) continue;
             seen.add(key);
-            const qualityScore = await scoreJob(raw);
+            const scores = await scoreJob(raw);
             const job = {
               id: collected.length + 1,
               site,
@@ -292,7 +296,9 @@ export async function collectJobs({
               company: raw.company,
               location: raw.location ?? null,
               url: raw.url,
-              qualityScore,
+              qualityScore: scores.localScore,
+              aiScore: scores.aiScore,
+              aiReason: scores.aiReason,
               collectedAt: new Date().toISOString(),
             };
             collected.push(job);

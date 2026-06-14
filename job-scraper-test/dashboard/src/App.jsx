@@ -1140,6 +1140,8 @@ export default function App() {
                     <th>Title</th>
                     <th>Company</th>
                     <th>Location</th>
+                    <th>Score</th>
+                    <th>AI Reason</th>
                     <th>Link</th>
                   </tr>
                 </thead>
@@ -1152,7 +1154,15 @@ export default function App() {
                       </td>
                       <td>{job.title || "—"}</td>
                       <td>{job.company || "—"}</td>
-                      <td>{job.location || "—"}</td>
+                      <td>{job.location}</td>
+                      <td className="mono">
+                        {job.aiScore ? (
+                          <span className="ai-score-pill">{job.aiScore}%</span>
+                        ) : (
+                          <span className="local-score-pill">{job.qualityScore}%</span>
+                        )}
+                      </td>
+                      <td className="reason-cell">{job.aiReason || "—"}</td>
                       <td>
                         {job.url ? (
                           <a href={job.url} target="_blank" rel="noreferrer">
@@ -1181,6 +1191,24 @@ export default function App() {
                   <h4>{job.title || "Untitled"}</h4>
                   <p className="co">{job.company || "Unknown"}</p>
                   {job.location && <p className="loc">{job.location}</p>}
+
+                  <div className="score-area">
+                    {job.aiScore ? (
+                      <div className="ai-insight">
+                        <div className="ai-score-header">
+                          <span className="ai-label">AI Match</span>
+                          <span className="ai-score">{job.aiScore}%</span>
+                        </div>
+                        <p className="ai-reason">{job.aiReason}</p>
+                      </div>
+                    ) : (
+                      <div className="local-insight">
+                        <span className="local-label">Local Match</span>
+                        <span className="local-score">{job.qualityScore}%</span>
+                      </div>
+                    )}
+                  </div>
+
                   {job.url && (
                     <a href={job.url} target="_blank" rel="noreferrer">
                       View posting →

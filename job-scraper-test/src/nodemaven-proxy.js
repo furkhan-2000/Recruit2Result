@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { getSecret } from "./secrets-manager.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -84,19 +85,17 @@ export function parseTrafficFrozen(value) {
 }
 
 export function getApiKey() {
-  loadProxyEnv();
   return (
-    process.env.NODEMAVEN_API_KEY?.trim() ||
-    process.env.NODEMAVEN_APIKEY?.trim() ||
+    getSecret("NODEMAVEN_API_KEY") ||
+    getSecret("NODEMAVEN_APIKEY") ||
     null
   );
 }
 
 export function hasExplicitProxyCredentials() {
-  loadProxyEnv();
   return Boolean(
-    process.env.NODEMAVEN_PROXY_USER?.trim() &&
-      process.env.NODEMAVEN_PROXY_PASSWORD?.trim()
+    getSecret("NODEMAVEN_PROXY_USER") &&
+      getSecret("NODEMAVEN_PROXY_PASSWORD")
   );
 }
 

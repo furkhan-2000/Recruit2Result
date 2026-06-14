@@ -35,3 +35,4 @@ Thumbs.db
 # Puppeteer / Chrome cache (if stored locally)
 .cache/
 .local-chromium/
+.apikey
