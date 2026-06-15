@@ -4,7 +4,7 @@ Research notes on proxy usage, ban risk, platform behavior, and implementation s
 
 **Last updated:** June 4, 2026 (added §1.4–1.6: proxy decision example, plateau vs IP blocks, parallel scraping)
 
----
+--- #ok
 
 ## Table of contents
 
