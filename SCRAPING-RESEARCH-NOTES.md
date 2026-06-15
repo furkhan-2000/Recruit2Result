@@ -1,4 +1,4 @@
-# Web Scraping Research Notes::::
+# Web Scraping Research Notes:::
 
 Research notes on proxy usage, ban risk, platform behavior, and implementation strategy for data-scraping automation projects. Compiled for planning video content and technical setup.
 
