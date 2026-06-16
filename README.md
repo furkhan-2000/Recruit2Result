@@ -248,12 +248,12 @@ See [`SCRAPING-RESEARCH-NOTES.md`](./SCRAPING-RESEARCH-NOTES.md) for a deeper br
 
 ## Author
 
-**[Vivek Mishra](https://github.com/vivekmishraishere)**
+**[Khan Mohammed](https://www.linkedin.com/in/khan-mohammed-790b18214)**
 
-Builder of automation tools for scraping, lead research, and workflow productivity. This public repo documents real-world patterns for browser-based data extraction — from first prototype on a home IP to proxy-backed production deploys.
+Builder of automation tools for scraping, lead research, and workflow productivity. This private repo documents real-world patterns for browser-based data extraction — from first prototype on a home IP to proxy-backed production deploys.
 
-- GitHub: [@vivekmishraishere](https://github.com/vivekmishraishere)
-- Repo: [AI-OS-3-scrapping-agents](https://github.com/vivekmishraishere/AI-OS-3-scrapping-agents)
+- GitHub: [@Khan Mohammed](https://github.com/furkhan-2000)
+- Repo: [Recruit2Result](https://github.com/furkhan-2000/Recruit2Result.git)
 
 If you use this repo in a video, article, or course — a mention or link back is appreciated.
 
