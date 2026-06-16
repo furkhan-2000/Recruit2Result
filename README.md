@@ -1,6 +1,6 @@
 # Recruit2Result — Scraping Agents
 
-**By [Khan Mohammed](https://github.com/KhanMohammed)**
+**By [Khan Mohammed](https://www.linkedin.com/in/khan-mohammed-790b18214)**
 
 [![Repository](https://img.shields.io/badge/GitHub-Recruit2Result-blue)](https://github.com/KhanMohammed/Recruit2Result)
 
@@ -8,7 +8,7 @@ A collection of browser-based data extraction tools with live dashboards — bui
 
 > Public learning and productivity workspace. Use responsibly and in line with each platform’s terms of service.
 
-**Repository:** [github.com/vivekmishraishere/AI-OS-3-scrapping-agents](https://github.com/vivekmishraishere/AI-OS-3-scrapping-agents)
+**Repository:** [https://github.com/furkhan-2000/Recruit2Result.git]
 
 ---
 
