@@ -12,6 +12,7 @@ const screenshotsDir = join(__dirname, "..", "output", "screenshots");
 import {
   extractLinkedInJobsFromPage,
   extractIndeedJobsFromPage,
+  extractNaukrigulfJobsFromPage,
   scrollResultsList,
 } from "./extractors.js";
 
@@ -136,7 +137,9 @@ export async function collectJobs({
     const waitSel =
       site === "linkedin"
         ? ".jobs-search-results-list, .jobs-search__results-list, [data-job-id], .base-card"
-        : ".job_seen_beacon, [data-jk], h2.jobTitle";
+        : site === "indeed"
+        ? ".job_seen_beacon, [data-jk], h2.jobTitle"
+        : ".ng-job-card, .job-card, .job-title";
 
     await page.waitForSelector(waitSel, { timeout: 20000 }).catch(() => {});
 
@@ -161,7 +164,11 @@ export async function collectJobs({
       const batch =
         site === "linkedin"
           ? await extractLinkedInJobsFromPage(page)
-          : await extractIndeedJobsFromPage(page);
+          : site === "indeed"
+          ? await extractIndeedJobsFromPage(page)
+          : site === "naukrigulf"
+          ? await extractNaukrigulfJobsFromPage(page)
+          : [];
 
       let newInRound = 0;
       for (const raw of batch) {

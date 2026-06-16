@@ -1,6 +1,6 @@
 # Universal AI Prompt: NodeMaven Rotating Proxy for Puppeteer
 
-**By Vivek Mishra** · Part of the [Data Scraping Automation Suite](./README.md)
+**By Khan Mohammed** · Part of the [Data Scraping Automation Suite](./README.md)
 
 Give this file to anyone setting up proxy support in a **Node.js + Puppeteer** scraper. It is **not tied to any specific app** — copy the prompt block below, paste it into any AI assistant, and fill in your project details at the end.
 

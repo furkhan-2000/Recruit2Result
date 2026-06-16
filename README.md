@@ -1,8 +1,8 @@
-# AI OS 3 — Scraping Agents
+# Recruit2Result — Scraping Agents
 
-**By [Vivek Mishra](https://github.com/vivekmishraishere)**
+**By [Khan Mohammed](https://github.com/KhanMohammed)**
 
-[![Repository](https://img.shields.io/badge/GitHub-AI--OS--3--scrapping--agents-blue)](https://github.com/vivekmishraishere/AI-OS-3-scrapping-agents)
+[![Repository](https://img.shields.io/badge/GitHub-Recruit2Result-blue)](https://github.com/KhanMohammed/Recruit2Result)
 
 A collection of browser-based data extraction tools with live dashboards — built for research, lead generation, and workflow automation. Each app runs independently with its own API, UI, and SQLite history where applicable.
 

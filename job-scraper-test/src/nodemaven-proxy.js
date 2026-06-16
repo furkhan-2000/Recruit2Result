@@ -277,9 +277,16 @@ export function createProxySessionManager({
     rotateForSite(site) {
       rotationCount += 1;
       const sessionId = generateSessionId();
+
+      // Override country for specific sites if needed
+      let siteCountry = country;
+      if (site === "naukrigulf" && !siteCountry) {
+        siteCountry = "ae"; // Default to UAE for Naukrigulf if no preference set
+      }
+
       const username = buildNodeMavenUsername({
         baseUser,
-        country,
+        country: siteCountry,
         sessionId,
         filter,
       });

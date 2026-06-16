@@ -88,3 +88,52 @@ export function logTokenUsage(promptTokens, completionTokens) {
     console.error("Failed to log token usage:", e.message);
   }
 }
+
+/**
+ * Enterprise Candidate Scoring
+ * Evaluates a candidate against job requirements.
+ * Returns { score: 0-100, reason: string }
+ */
+export async function scoreCandidate(candidate, jobRequirements) {
+  const messages = [
+    {
+      role: "system",
+      content: `You are an Elite Executive Recruiter. Your task is to score a candidate against specific job requirements.
+Return a JSON object with:
+- "score": A number between 0 and 100 representing the match percentage.
+- "reason": A one-sentence "Why this candidate?" summary.
+
+Be extremely critical. Only 90+ for perfect matches.`
+    },
+    {
+      role: "user",
+      content: JSON.stringify({
+        candidate: {
+          skills: candidate.skills,
+          experience: candidate.experience,
+          currentRole: candidate.currentRole
+        },
+        requirements: jobRequirements
+      })
+    }
+  ];
+
+  const response = await callGroq(messages, {
+    model: "llama3-70b-8192", // Using a capable model for scoring
+    temperature: 0.2
+  });
+
+  if (response) {
+    try {
+      const parsed = JSON.parse(response);
+      return {
+        score: parsed.score || 0,
+        reason: parsed.reason || "Unable to determine match reason."
+      };
+    } catch (e) {
+      console.error("Failed to parse scoring response:", e.message);
+    }
+  }
+
+  return { score: 0, reason: "AI scoring failed." };
+}

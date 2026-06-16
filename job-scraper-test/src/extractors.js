@@ -100,6 +100,32 @@ export async function extractIndeedJobsFromPage(page) {
   });
 }
 
+export async function extractNaukrigulfJobsFromPage(page) {
+  return await page.evaluate(() => {
+    const jobCards = document.querySelectorAll(".ng-job-card, .job-card, [data-job-id]");
+    const results = [];
+    jobCards.forEach((card) => {
+      try {
+        const titleEl = card.querySelector(".job-title, h2, h3, .title, a[href*='/job-']");
+        const companyEl = card.querySelector(".company-name, .info-org, .org, .company");
+        const locationEl = card.querySelector(".location, .info-loc, .loc");
+        const linkEl = card.querySelector("a[href*='/job-'], a.job-title");
+
+        if (titleEl) {
+          results.push({
+            title: titleEl.innerText.trim(),
+            company: companyEl ? companyEl.innerText.trim() : "Unknown",
+            location: locationEl ? locationEl.innerText.trim() : "Unknown",
+            url: linkEl ? linkEl.href : window.location.href,
+            source: "naukrigulf",
+          });
+        }
+      } catch (e) {}
+    });
+    return results;
+  });
+}
+
 export async function scrollResultsList(page, site) {
   await page.evaluate((siteName) => {
     const selectors =
