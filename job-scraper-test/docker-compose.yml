@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  orchestrator:
+    build: ./services/orchestrator
+    ports:
+      - "3847:3000"
+    environment:
+      - NODE_ENV=production
+      - SCRAPER_SERVICE_URL=http://scraper:3001
+      - ENRICHMENT_SERVICE_URL=http://enrichment:3002
+      - AI_SWARM_SERVICE_URL=http://ai-swarm:3003
+      - OUTREACH_SERVICE_URL=http://outreach:3004
+    env_file:
+      - .env
+    depends_on:
+      - scraper
+      - enrichment
+      - ai-swarm
+      - outreach
+    networks:
+      - recruit2result-net
+
+  scraper:
+    build: ./services/scraper
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  enrichment:
+    build: ./services/enrichment
+    ports:
+      - "3002:3000"
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  ai-swarm:
+    build: ./services/ai-swarm
+    ports:
+      - "3003:3000"
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  outreach:
+    build: ./services/outreach
+    ports:
+      - "3004:3000"
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+networks:
+  recruit2result-net:
+    driver: bridge

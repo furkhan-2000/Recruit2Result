@@ -4,6 +4,8 @@
  */
 import { mineGitHubEmails } from "./enrichment/github-miner.js";
 import { verifyEmail } from "./enrichment/contact-verifier.js";
+import { build360Profile } from "./enrichment/cross-referencer.js";
+import { logComplianceEvent } from "./compliance-engine.js";
 import { auditCodeQuality } from "./ai/code-auditor.js";
 import { analyzeCultureFit } from "./ai/psychometric-agent.js";
 import { orchestrateDualOutreach } from "./outreach/dual-intent-agent.js";
@@ -19,6 +21,12 @@ export class InfiniteLoopManager {
    */
   async processCandidate(candidate, job, hrContact) {
     console.log(`[InfiniteLoop] Starting cycle for candidate: ${candidate.name}`);
+    logComplianceEvent(candidate.id || candidate.name, "START_CYCLE", "Initiating autonomous recruitment cycle");
+
+    // 0. Build 360 Profile (Multi-Source Sync)
+    console.log(`[InfiniteLoop] Building 360 Profile...`);
+    const profile360 = await build360Profile(candidate);
+    Object.assign(candidate, profile360);
 
     // 1. Deep Enrichment (GitHub)
     if (candidate.github) {
@@ -29,6 +37,9 @@ export class InfiniteLoopManager {
         // Verify primary email
         const verification = await verifyEmail(emails[0]);
         candidate.emailVerified = verification.valid;
+        if (candidate.emailVerified) {
+          logComplianceEvent(candidate.id || candidate.name, "EMAIL_VERIFIED", "Successfully verified candidate email via SMTP");
+        }
       }
     }
 

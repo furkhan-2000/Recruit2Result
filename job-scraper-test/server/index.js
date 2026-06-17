@@ -28,6 +28,7 @@ import {
 import { buildRunSummary } from "../src/run-summary.js";
 import { autoBridgeToHR } from "../src/workflow-manager.js";
 import { InfiniteLoopManager } from "../src/infinite-loop-manager.js";
+import { exportToATS } from "../src/ats-exporter.js";
 import {
   loadProxyEnv,
   isProxyConfigured,
@@ -267,6 +268,18 @@ app.post("/api/workflow/infinite-loop", async (req, res) => {
     res.json({ success: true, result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post("/api/workflow/export-ats", async (req, res) => {
+  const { candidate, atsType } = req.body;
+  if (!candidate) return res.status(400).json({ error: "Missing candidate data" });
+  
+  try {
+    const result = await exportToATS(candidate, atsType);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
