@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchableSelect from "./components/SearchableSelect.jsx";
 import ProxyPanel from "./components/ProxyPanel.jsx";
+import "./index.css";
+import "./premium.css";
 import {
   POSTED_OPTIONS,
   WORK_OPTIONS,
@@ -20,6 +22,82 @@ function formatTime() {
     minute: "2-digit",
     second: "2-digit",
   });
+}
+
+/**
+ * Premium Card with Cursor Tracking Effect
+ */
+function PremiumJobCard({ job, onRunInfiniteLoop }) {
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const tiltX = (y - centerY) / 10;
+    const tiltY = (centerX - x) / 10;
+    setTilt({ x: tiltX, y: tiltY });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
+  return (
+    <article
+      ref={cardRef}
+      className={`job-card ${job.site}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+      }}
+    >
+      <header>
+        <span className="mono">#{String(job.id).padStart(3, "0")}</span>
+        <span className={`badge ${job.site}`}>{job.site}</span>
+      </header>
+      <h4>{job.title || "Untitled"}</h4>
+      <p className="co">{job.company || "Unknown"}</p>
+      {job.location && <p className="loc">{job.location}</p>}
+
+      <div className="score-area">
+        {job.aiScore ? (
+          <div className="ai-insight">
+            <div className="ai-score-header">
+              <span className="ai-label">AI Match</span>
+              <span className="ai-score">{job.aiScore}%</span>
+            </div>
+            <p className="ai-reason">{job.aiReason}</p>
+          </div>
+        ) : (
+          <div className="local-insight">
+            <span className="local-label">Local Match</span>
+            <span className="local-score">{job.qualityScore}%</span>
+          </div>
+        )}
+      </div>
+
+      <div className="card-actions">
+        {job.url && (
+          <a href={job.url} target="_blank" rel="noreferrer" className="view-link">
+            View posting →
+          </a>
+        )}
+        <button 
+          className="btn-mini infinite-btn"
+          onClick={() => onRunInfiniteLoop(job)}
+          title="Trigger Infinite Loop Agents"
+        >
+          ⚡ Agent Swarm
+        </button>
+      </div>
+    </article>
+  );
 }
 
 function ChipGroup({ label, options, value, onChange, disabled }) {
@@ -85,6 +163,14 @@ export default function App() {
   const [egressMode, setEgressMode] = useState("local");
   const [proxyConfigured, setProxyConfigured] = useState(false);
   const [proxyReport, setProxyReport] = useState(null);
+  const [scrollY, setScrollY] = useState(0);
+
+  const [candidateProfile, setCandidateProfile] = useState({
+    name: "Furkhan",
+    github: "furkhan-2000",
+    skills: "React, Node.js, Puppeteer, AI",
+  });
+
   const [intelligence, setIntelligence] = useState({
     totalJobs: 0,
     insights: { remoteJobs: 0, sources: 0, companies: 0, locations: 0 },
@@ -95,6 +181,13 @@ export default function App() {
   const eventSourceRef = useRef(null);
   const streamDoneRef = useRef(false);
   const extractLockRef = useRef(false);
+
+  // Parallax Effect
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const pushLog = useCallback((text, level = "info") => {
     setLogs((prev) => [{ t: formatTime(), text, level }, ...prev.slice(0, 99)]);
@@ -579,67 +672,67 @@ export default function App() {
     proxyConfigured,
   ]);
 
+  const runInfiniteLoop = useCallback(async (job) => {
+    pushLog(`Triggering Infinite Loop for ${job.company}...`, "info");
+    try {
+      const res = await fetch("/api/workflow/infinite-loop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          candidate: candidateProfile,
+          job: job
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        pushLog(`Infinite Loop Cycle Complete for ${job.company}!`, "success");
+        pushLog(`Elite Score: ${data.result.candidate.eliteScore}%`, "success");
+      } else {
+        pushLog(`Infinite Loop Failed: ${data.error}`, "error");
+      }
+    } catch (err) {
+      pushLog(`Error triggering Infinite Loop: ${err.message}`, "error");
+    }
+  }, [candidateProfile, pushLog]);
+
   return (
-    <div className={`shell status-${status}`}>
-      <header className="topbar">
+   <div className={`shell status-${status}`}>
+     <div className="smoke-layer" />
+     <div className="parallax-bg" style={{ "--scroll-y": `${scrollY}px` }} />
+
+     <header className="topbar">
         <div className="brand">
           <div className="logo" aria-hidden>
             <svg viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="9" fill="url(#lg)" />
+              <rect width="32" height="32" rx="9" fill="#0071E3" />
               <path
                 d="M9 22V10h4.2l3.1 8.2L19.4 10H23v12h-3.4v-7.5L16.2 22h-2.8l-3.4-7.5V22H9z"
-                fill="#0b0f1a"
+                fill="white"
               />
-              <defs>
-                <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
-                  <stop stopColor="#38bdf8" />
-                  <stop offset="1" stopColor="#a855f7" />
-                </linearGradient>
-              </defs>
             </svg>
           </div>
           <div>
-            <h1>Job Extract OS</h1>
-            <p>Live scraper · filters · up to {MAX_JOBS} jobs</p>
+            <h1>Recruit2Result</h1>
+            <p>Ultra-Premium Job Intelligence OS</p>
           </div>
         </div>
         <div className="topbar-actions">
-          <div
-            className="egress-toggle"
-            role="group"
-            aria-label="Egress: local system or proxy"
-          >
+          <div className="egress-toggle">
             <button
-              type="button"
               className={egressMode === "local" ? "active" : ""}
-              disabled={running || serverBusy}
               onClick={() => setEgressMode("local")}
             >
-              Local system
+              Local
             </button>
             <button
-              type="button"
               className={egressMode === "proxy" ? "active" : ""}
-              disabled={running || serverBusy}
-              title={
-                proxyConfigured
-                  ? "Route Puppeteer via NodeMaven"
-                  : "Set NODEMAVEN_API_KEY in .env"
-              }
               onClick={() => setEgressMode("proxy")}
             >
               Proxy
             </button>
           </div>
-          <span className="pill warn">Research mode</span>
-          <span
-            className={`pill ${running || serverBusy || status === "running" ? "live" : ""}`}
-          >
-            {running || serverBusy || status === "running"
-              ? "● Live"
-              : viewSource === "history"
-                ? "History"
-                : "Idle"}
+          <span className={`pill ${running ? "live" : ""}`}>
+            {running ? "● Active" : "Idle"}
           </span>
         </div>
       </header>
@@ -647,595 +740,144 @@ export default function App() {
       <div className="workspace">
         <aside className="sidebar">
           <section className="card">
-            <h2>Platforms</h2>
-            <div className="platform-grid">
-              <label className={`platform ${linkedinOn ? "on linkedin" : ""}`}>
-                <input
-                  type="checkbox"
-                  checked={linkedinOn}
-                  disabled={running}
-                  onChange={(e) => setLinkedinOn(e.target.checked)}
-                />
-                <span className="platform-name">LinkedIn</span>
-                <span className="platform-sub">f_TPR · f_WT · sortBy</span>
-              </label>
-              <label className={`platform ${indeedOn ? "on indeed" : ""}`}>
-                <input
-                  type="checkbox"
-                  checked={indeedOn}
-                  disabled={running}
-                  onChange={(e) => setIndeedOn(e.target.checked)}
-                />
-                <span className="platform-name">Indeed</span>
-                <span className="platform-sub">fromage · sort · sc</span>
-              </label>
+            <h2>Candidate Profile</h2>
+            <div className="field">
+              <label>Name</label>
+              <input 
+                value={candidateProfile.name} 
+                onChange={e => setCandidateProfile({...candidateProfile, name: e.target.value})}
+              />
             </div>
+            <div className="field">
+              <label>GitHub Username</label>
+              <input 
+                value={candidateProfile.github} 
+                onChange={e => setCandidateProfile({...candidateProfile, github: e.target.value})}
+              />
+            </div>
+            <div className="field">
+              <label>Skills (comma separated)</label>
+              <input 
+                value={candidateProfile.skills} 
+                onChange={e => setCandidateProfile({...candidateProfile, skills: e.target.value})}
+              />
+            </div>
+            <p className="filter-hint">Used for AI Swarm vetting & Email Mining</p>
           </section>
 
-          <section className="card section-common">
-            <h2>Common filters</h2>
-            <p className="section-desc">Shared across LinkedIn and Indeed</p>
+          <section className="card">
+            <h2>Extraction Filters</h2>
             <div className="field">
               <label>Keywords</label>
               <input
                 value={keywords}
-                disabled={running || useCustomUrls}
                 onChange={(e) => setKeywords(e.target.value)}
-                placeholder="e.g. software engineer, react developer"
+                placeholder="e.g. Lead Engineer"
               />
             </div>
-
-            {!separateLocations && (
-              <SearchableSelect
-                label="Location"
-                value={location}
-                disabled={running || useCustomUrls}
-                placeholder="Search city, country, or Remote…"
-                onChange={setLocation}
-              />
-            )}
-
-            <label className="check-row">
-              <input
-                type="checkbox"
-                checked={separateLocations}
-                disabled={running || useCustomUrls}
-                onChange={(e) => setSeparateLocations(e.target.checked)}
-              />
-              Separate location per platform
-            </label>
-
+            <SearchableSelect
+              label="Location"
+              value={location}
+              onChange={setLocation}
+            />
             <ChipGroup
-              label="Posted within"
+              label="Posted"
               options={POSTED_OPTIONS}
               value={postedWithin}
-              disabled={running || useCustomUrls}
               onChange={setPostedWithin}
             />
-            {postedWithin === "custom" && (
-              <div className="field custom-hours">
-                <label>Custom hours</label>
-                <div className="custom-hours-row">
-                  <input
-                    type="number"
-                    min={1}
-                    max={720}
-                    value={customHours}
-                    disabled={running || useCustomUrls}
-                    onChange={(e) =>
-                      setCustomHours(
-                        Math.min(720, Math.max(1, Number(e.target.value) || 1))
-                      )
-                    }
-                  />
-                  <span className="unit">hours</span>
-                </div>
-                <p className="filter-hint">
-                  LinkedIn uses exact seconds (<code>f_TPR=r{customHours * 3600}</code>
-                  ). Indeed rounds up to day buckets (<code>fromage</code>).
-                </p>
-              </div>
-            )}
-
-            <ChipGroup
-              label="Sort order"
-              options={SORT_OPTIONS}
-              value={sort}
-              disabled={running || useCustomUrls}
-              onChange={setSort}
-            />
-          </section>
-
-          {linkedinOn && (
-            <section className="card section-linkedin">
-              <h2>
-                <span className="dot li" /> LinkedIn filters
-              </h2>
-              {separateLocations && (
-                <SearchableSelect
-                  label="Location"
-                  value={linkedinLocation}
-                  disabled={running || useCustomUrls}
-                  onChange={setLinkedinLocation}
-                />
-              )}
-              <ChipGroup
-                label="Work type"
-                options={WORK_OPTIONS}
-                value={linkedinWorkType}
-                disabled={running || useCustomUrls}
-                onChange={setLinkedinWorkType}
-              />
-              <ChipGroup
-                label="Experience"
-                options={LINKEDIN_EXP_OPTIONS}
-                value={linkedinExperience}
-                disabled={running || useCustomUrls}
-                onChange={setLinkedinExperience}
-              />
-              <p className="filter-hint">
-                Maps to <code>f_WT</code>, <code>f_E</code> (Fresher = Entry).
-              </p>
-            </section>
-          )}
-
-          {indeedOn && (
-            <section className="card section-indeed">
-              <h2>
-                <span className="dot in" /> Indeed filters
-              </h2>
-              {separateLocations && (
-                <SearchableSelect
-                  label="Location"
-                  value={indeedLocation}
-                  disabled={running || useCustomUrls}
-                  onChange={setIndeedLocation}
-                />
-              )}
-              <ChipGroup
-                label="Work type"
-                options={WORK_OPTIONS}
-                value={indeedWorkType}
-                disabled={running || useCustomUrls}
-                onChange={setIndeedWorkType}
-              />
-              <ChipGroup
-                label="Experience"
-                options={INDEED_EXP_OPTIONS}
-                value={indeedExperience}
-                disabled={running || useCustomUrls}
-                onChange={setIndeedExperience}
-              />
-              <ChipGroup
-                label="Job type"
-                options={INDEED_JOB_TYPE_OPTIONS}
-                value={indeedJobType}
-                disabled={running || useCustomUrls}
-                onChange={setIndeedJobType}
-              />
-              <p className="filter-hint">
-                Maps to <code>explvl</code>, <code>jt</code>, remote <code>sc</code>.
-              </p>
-            </section>
-          )}
-
-          <section className="card">
-            <label className="check-row">
-              <input
-                type="checkbox"
-                checked={useCustomUrls}
-                disabled={running}
-                onChange={(e) => setUseCustomUrls(e.target.checked)}
-              />
-              Edit raw URLs manually
-            </label>
-          </section>
-
-          <section className="card">
-            <h2>Run settings</h2>
-            <div className="quantity-block">
-              <div className="quantity-head">
-                <label>Jobs per platform</label>
-                <span className="quantity-num">{quantity}</span>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={MAX_JOBS}
-                value={quantity}
-                disabled={running}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-              />
-              <input
-                type="number"
-                className="quantity-input"
-                min={1}
-                max={MAX_JOBS}
-                value={quantity}
-                disabled={running}
-                onChange={(e) =>
-                  setQuantity(
-                    Math.min(MAX_JOBS, Math.max(1, Number(e.target.value) || 1))
-                  )
-                }
-              />
-            </div>
-            <label className="check-row">
-              <input
-                type="checkbox"
-                checked={headless}
-                disabled={running}
-                onChange={(e) => setHeadless(e.target.checked)}
-              />
-              Headless browser
-            </label>
-            <div className="btn-row">
-              <button
-                type="button"
-                className="btn primary"
-                disabled={running || serverBusy || selectedSites.length === 0}
-                onClick={startExtract}
-              >
-                {running || serverBusy ? "Extracting…" : "Extract"}
-              </button>
-              <button
-                type="button"
-                className="btn secondary"
-                disabled={!running && !serverBusy}
-                onClick={cancel}
-              >
-                Cancel
-              </button>
-            </div>
-            {serverBusy && !running && (
-              <button type="button" className="btn reset-lock" onClick={resetServer}>
-                Reset server lock
-              </button>
-            )}
+            <button
+              className="btn primary"
+              style={{ width: "100%", marginTop: "10px" }}
+              disabled={running || serverBusy}
+              onClick={startExtract}
+            >
+              Start Extraction
+            </button>
           </section>
 
           <section className="card history-panel">
-            <div className="history-head">
-              <h2>Extraction history</h2>
-              <button type="button" className="btn-mini" onClick={loadHistory}>
-                Refresh
-              </button>
-            </div>
-            <p className="section-desc">Saved in <code>output/history/</code></p>
-            {viewSource === "history" && (
-              <button
-                type="button"
-                className="btn-mini live-view"
-                onClick={() => {
-                  setViewSource("live");
-                  setSelectedHistoryId(null);
-                }}
-              >
-                ← Back to live view
-              </button>
-            )}
+            <h2>History</h2>
             <ul className="history-list">
-              {historyRuns.length === 0 ? (
-                <li className="history-empty">No saved runs yet</li>
-              ) : (
-                historyRuns.map((run) => (
-                  <li key={run.id}>
-                    <button
-                      type="button"
-                      className={`history-item ${selectedHistoryId === run.id ? "active" : ""}`}
-                      onClick={() => loadHistoryRun(run.id)}
-                    >
-                      <span className="history-title mono">{run.id}</span>
-                      <span className="history-meta">
-                        {run.totalCollected ?? 0} jobs · {run.sites?.join("+")} ·{" "}
-                        <span className={`outcome-tag ${run.outcome ?? run.status}`}>
-                          {run.summaryTitle ?? run.status}
-                        </span>
-                      </span>
-                      <span className="history-meta sub">
-                        {run.filters?.keywords} · {run.filters?.postedWithin}
-                      </span>
-                    </button>
-                  </li>
-                ))
-              )}
+              {historyRuns.map((run) => (
+                <li key={run.id}>
+                  <button
+                    className={`history-item ${selectedHistoryId === run.id ? "active" : ""}`}
+                    onClick={() => loadHistoryRun(run.id)}
+                  >
+                    <span className="history-title">{run.id}</span>
+                    <span className="history-meta">{run.totalCollected} jobs</span>
+                  </button>
+                </li>
+              ))}
             </ul>
-          </section>
-
-          <section className="card url-preview">
-            <h2>Generated URLs</h2>
-            {linkedinOn && (
-              <div className="url-box">
-                <span className="url-tag li">LI</span>
-                <code>{useCustomUrls ? linkedinUrl : builtUrls.linkedin}</code>
-              </div>
-            )}
-            {indeedOn && (
-              <div className="url-box">
-                <span className="url-tag in">IN</span>
-                <code>{useCustomUrls ? indeedUrl : builtUrls.indeed}</code>
-              </div>
-            )}
-            {useCustomUrls && (
-              <>
-                <input
-                  className="url-edit"
-                  value={linkedinUrl}
-                  disabled={running}
-                  onChange={(e) => setLinkedinUrl(e.target.value)}
-                />
-                <input
-                  className="url-edit"
-                  value={indeedUrl}
-                  disabled={running}
-                  onChange={(e) => setIndeedUrl(e.target.value)}
-                />
-              </>
-            )}
           </section>
         </aside>
 
         <main className="main">
-          {runSummary && (
-            <div className={`outcome-banner outcome-${runSummary.outcome}`}>
-              <div className="outcome-head">
-                <strong>{runSummary.title}</strong>
-                <span className="mono">
-                  {runSummary.collected}/{runSummary.target} ({runSummary.percent}%)
-                </span>
-              </div>
-              <pre className="outcome-diagnosis">{runSummary.diagnosis}</pre>
-            </div>
-          )}
-
           <div className="hero-metrics">
-            <div className="metric progress-metric">
+            <div className="progress-metric">
               <div className="progress-ring" style={{ "--pct": progressPct }}>
                 <svg viewBox="0 0 100 100">
                   <circle className="track" cx="50" cy="50" r="42" />
                   <circle className="fill" cx="50" cy="50" r="42" />
                 </svg>
                 <div className="ring-label">
-                  <strong className="mono">
-                    {running || status === "done" ? current : "0"}
-                  </strong>
-                  <span className="mono">/ {targetTotal || "—"}</span>
+                  <strong>{current}</strong>
+                  <span>/ {targetTotal || "—"}</span>
                 </div>
               </div>
               <div>
                 <h3>{message}</h3>
-                <p>
-                  {activeSite
-                    ? `Active: ${activeSite}`
-                    : `Posted: ${postedWithin === "custom" ? `${customHours}h` : postedWithin} · sort: ${sort}`}
-                </p>
                 <div className="bar">
                   <div className="bar-fill" style={{ width: `${progressPct}%` }} />
                 </div>
               </div>
             </div>
-            <div className="metric-stats">
-              <div className="stat">
-                <span>LinkedIn</span>
-                <strong>{linkedinCount}</strong>
-              </div>
-              <div className="stat">
-                <span>Indeed</span>
-                <strong>{indeedCount}</strong>
-              </div>
-              <div className="stat accent">
-                <span>Total</span>
-                <strong>{jobs.length}</strong>
-              </div>
-            </div>
           </div>
 
-          <section className="intelligence-grid" aria-label="Job intelligence index">
-            <article className="intel-card">
-              <span>Indexed jobs</span>
+          <section className="intelligence-grid">
+            <div className="stat">
+              <span>Indexed</span>
               <strong>{intelligence.totalJobs}</strong>
-            </article>
-            <article className="intel-card">
+            </div>
+            <div className="stat">
               <span>Companies</span>
               <strong>{intelligence.insights.companies}</strong>
-            </article>
-            <article className="intel-card">
-              <span>Remote jobs</span>
+            </div>
+            <div className="stat">
+              <span>Remote</span>
               <strong>{intelligence.insights.remoteJobs}</strong>
-            </article>
-            <article className="intel-card">
-              <span>Locations</span>
-              <strong>{intelligence.insights.locations}</strong>
-            </article>
+            </div>
           </section>
 
-          {healthRows.length > 0 && (
-            <section className="card source-health-card">
-              <div className="source-health-head">
-                <h2>Source health</h2>
-                {intelligence.updatedAt && (
-                  <span className="mono">
-                    Updated {new Date(intelligence.updatedAt).toLocaleString()}
-                  </span>
-                )}
-              </div>
-              <div className="source-health-list">
-                {healthRows.map((source) => (
-                  <div key={source.source} className="source-health-row">
-                    <div>
-                      <strong>{source.source}</strong>
-                      <span>
-                        {source.jobsCollected} jobs · {source.totalRuns} runs ·{" "}
-                        {source.lastStatus}
-                      </span>
-                    </div>
-                    <meter min="0" max="100" value={source.healthScore} />
-                    <span className="mono">{source.healthScore}%</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {(screenshots.linkedin || screenshots.indeed) && (
-            <div className="browser-preview card">
-              <h2>Puppeteer snapshot</h2>
-              <div className="shots">
-                {screenshots.linkedin && (
-                  <figure>
-                    <figcaption>LinkedIn</figcaption>
-                    <img src={screenshots.linkedin} alt="LinkedIn browser view" />
-                  </figure>
-                )}
-                {screenshots.indeed && (
-                  <figure>
-                    <figcaption>Indeed</figcaption>
-                    <img src={screenshots.indeed} alt="Indeed browser view" />
-                  </figure>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div className="results-toolbar">
+          <div className="results-toolbar" style={{ marginTop: "30px" }}>
             <input
               className="search-jobs"
-              placeholder="Filter results…"
+              placeholder="Filter results..."
               value={jobFilter}
               onChange={(e) => setJobFilter(e.target.value)}
             />
-            <div className="view-toggle">
-              <button
-                type="button"
-                className={viewMode === "cards" ? "active" : ""}
-                onClick={() => setViewMode("cards")}
-              >
-                Cards
-              </button>
-              <button
-                type="button"
-                className={viewMode === "table" ? "active" : ""}
-                onClick={() => setViewMode("table")}
-              >
-                Table
-              </button>
-            </div>
           </div>
 
-          {filteredJobs.length === 0 && !running && !serverBusy ? (
-            <div className="empty card">
-              <p>No jobs yet</p>
-              <span>
-                Set keywords, posted within (1h–30d), and quantity up to {MAX_JOBS}.
-                Results stream live: 1/{quantity}, 2/{quantity}…
-              </span>
-            </div>
-          ) : viewMode === "table" ? (
-            <div className="table-wrap card">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Site</th>
-                    <th>Title</th>
-                    <th>Company</th>
-                    <th>Location</th>
-                    <th>Score</th>
-                    <th>AI Reason</th>
-                    <th>Link</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredJobs.map((job) => (
-                    <tr key={`${job.site}-${job.url}-${job.id}`}>
-                      <td className="mono">{job.id}</td>
-                      <td>
-                        <span className={`badge ${job.site}`}>{job.site}</span>
-                      </td>
-                      <td>{job.title || "—"}</td>
-                      <td>{job.company || "—"}</td>
-                      <td>{job.location}</td>
-                      <td className="mono">
-                        {job.aiScore ? (
-                          <span className="ai-score-pill">{job.aiScore}%</span>
-                        ) : (
-                          <span className="local-score-pill">{job.qualityScore}%</span>
-                        )}
-                      </td>
-                      <td className="reason-cell">{job.aiReason || "—"}</td>
-                      <td>
-                        {job.url ? (
-                          <a href={job.url} target="_blank" rel="noreferrer">
-                            Open
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="job-grid">
-              {filteredJobs.map((job) => (
-                <article
-                  key={`${job.site}-${job.url}-${job.id}`}
-                  className={`job-card ${job.site}`}
-                >
-                  <header>
-                    <span className="mono">#{String(job.id).padStart(3, "0")}</span>
-                    <span className={`badge ${job.site}`}>{job.site}</span>
-                  </header>
-                  <h4>{job.title || "Untitled"}</h4>
-                  <p className="co">{job.company || "Unknown"}</p>
-                  {job.location && <p className="loc">{job.location}</p>}
+          <div className="job-grid">
+            {filteredJobs.map((job) => (
+              <PremiumJobCard 
+                key={`${job.site}-${job.url}-${job.id}`} 
+                job={job} 
+                onRunInfiniteLoop={runInfiniteLoop}
+              />
+            ))}
+          </div>
 
-                  <div className="score-area">
-                    {job.aiScore ? (
-                      <div className="ai-insight">
-                        <div className="ai-score-header">
-                          <span className="ai-label">AI Match</span>
-                          <span className="ai-score">{job.aiScore}%</span>
-                        </div>
-                        <p className="ai-reason">{job.aiReason}</p>
-                      </div>
-                    ) : (
-                      <div className="local-insight">
-                        <span className="local-label">Local Match</span>
-                        <span className="local-score">{job.qualityScore}%</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {job.url && (
-                    <a href={job.url} target="_blank" rel="noreferrer">
-                      View posting →
-                    </a>
-                  )}
-                </article>
-              ))}
-            </div>
-          )}
-
-          <ProxyPanel
-            proxyReport={proxyReport}
-            egressMode={egressMode}
-            proxyConfigured={proxyConfigured}
-          />
-
-          <section className="card log-card">
-            <h2>Activity</h2>
+          <section className="card log-card" style={{ marginTop: "40px" }}>
+            <h2>Agent Activity Log</h2>
             <div className="log">
               {logs.map((l, i) => (
                 <div key={i} className={`log-line ${l.level}`}>
                   <span className="mono">{l.t}</span> {l.text}
                 </div>
               ))}
-              {logs.length === 0 && (
-                <div className="log-line muted">Waiting…</div>
-              )}
             </div>
           </section>
         </main>

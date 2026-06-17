@@ -37,7 +37,7 @@ export async function launchBrowser({ headless, proxyServer } = {}) {
   }
 
   const browser = await puppeteer.launch({
-    headless: headless ? "shell" : false,
+    headless: headless ? true : false,
     args,
     defaultViewport: { width: 1366, height: 900 },
   });
@@ -83,6 +83,56 @@ export async function newPage(browser, { proxyAuth } = {}) {
     // Mock plugins
     Object.defineProperty(navigator, "plugins", { get: () => [1, 2, 3, 4, 5] });
     Object.defineProperty(navigator, "languages", { get: () => ["en-US", "en"] });
+
+    // --- GOD-MODE: HARDWARE FINGERPRINT RANDOMIZATION ---
+    
+    // 1. Canvas Fingerprint Randomization
+    const originalGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+    CanvasRenderingContext2D.prototype.getImageData = function(x, y, width, height) {
+      const imageData = originalGetImageData.apply(this, arguments);
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i] = imageData.data[i] + (Math.random() > 0.5 ? 1 : -1);
+      }
+      return imageData;
+    };
+
+    // 2. WebGL Fingerprint Randomization
+    const getParameter = WebGLRenderingContext.prototype.getParameter;
+    WebGLRenderingContext.prototype.getParameter = function(parameter) {
+      // Randomize RENDERER and VENDOR
+      if (parameter === 37445) return "Intel Open Source Technology Center";
+      if (parameter === 37446) return "Mesa DRI Intel(R) HD Graphics 5500 (Broadwell GT2)";
+      return getParameter.apply(this, arguments);
+    };
+
+    // 3. AudioContext Fingerprint Randomization
+    const originalGetChannelData = AudioBuffer.prototype.getChannelData;
+    AudioBuffer.prototype.getChannelData = function() {
+      const channelData = originalGetChannelData.apply(this, arguments);
+      for (let i = 0; i < channelData.length; i++) {
+        channelData[i] = channelData[i] + (Math.random() * 0.0000001);
+      }
+      return channelData;
+    };
+
+    // 4. Hardware Concurrency & Memory Randomization
+    const concurrency = [4, 8, 12, 16][Math.floor(Math.random() * 4)];
+    const memory = [4, 8, 16][Math.floor(Math.random() * 3)];
+    Object.defineProperty(navigator, "hardwareConcurrency", { get: () => concurrency });
+    Object.defineProperty(navigator, "deviceMemory", { get: () => memory });
+
+    // 5. Modern Client Hints (navigator.userAgentData)
+    if (navigator.userAgentData) {
+      const originalGetHighEntropyValues = navigator.userAgentData.getHighEntropyValues;
+      navigator.userAgentData.getHighEntropyValues = function(hints) {
+        return originalGetHighEntropyValues.apply(this, arguments).then(values => {
+          if (hints.includes("architecture")) values.architecture = "x86";
+          if (hints.includes("model")) values.model = "";
+          if (hints.includes("platformVersion")) values.platformVersion = "15.0.0";
+          return values;
+        });
+      };
+    }
   });
 
   return page;

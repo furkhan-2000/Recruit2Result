@@ -27,6 +27,7 @@ import {
 } from "../src/job-intelligence-store.js";
 import { buildRunSummary } from "../src/run-summary.js";
 import { autoBridgeToHR } from "../src/workflow-manager.js";
+import { InfiniteLoopManager } from "../src/infinite-loop-manager.js";
 import {
   loadProxyEnv,
   isProxyConfigured,
@@ -251,6 +252,21 @@ app.post("/api/workflow/bridge-hr", async (req, res) => {
     res.json({ success: true, results, logs });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message, logs });
+  }
+});
+
+app.post("/api/workflow/infinite-loop", async (req, res) => {
+  const { candidate, job, hrContact = { email: "hr@recruit2result.com" } } = req.body;
+  
+  if (!job) return res.status(400).json({ error: "Missing job data" });
+  
+  const manager = new InfiniteLoopManager();
+  
+  try {
+    const result = await manager.processCandidate(candidate, job, hrContact);
+    res.json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

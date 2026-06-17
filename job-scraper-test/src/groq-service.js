@@ -137,3 +137,24 @@ Be extremely critical. Only 90+ for perfect matches.`
 
   return { score: 0, reason: "AI scoring failed." };
 }
+
+/**
+ * Simple helper for generating text completions with Groq.
+ */
+export async function getGroqCompletion(prompt, { model = "llama3-70b-8192", json = false } = {}) {
+  const messages = [{ role: "user", content: prompt }];
+  const response = await callGroq(messages, {
+    model,
+    response_format: json ? { type: "json_object" } : null
+  });
+
+  if (json && response) {
+    try {
+      return JSON.parse(response);
+    } catch (e) {
+      console.error("Failed to parse JSON response:", e.message);
+      return null;
+    }
+  }
+  return response;
+}
