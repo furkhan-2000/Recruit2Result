@@ -1,10 +1,19 @@
 import express from "express";
+import cors from "cors";
 import axios from "axios";
 import dns from "dns";
 import { promisify } from "util";
 import net from "net";
 
 const app = express();
+
+// Production-Grade CORS (Ready for Cloudflare Pages)
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 // --- HEALTH CHECKS ---

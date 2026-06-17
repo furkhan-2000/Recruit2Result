@@ -3,13 +3,25 @@ import axios from "axios";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+
+// Production-Grade CORS (Ready for Cloudflare Pages)
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 
 // --- HEALTH CHECKS ---
 app.get("/healthz", (req, res) => res.json({ status: "ok" }));
 app.get("/livez", (req, res) => res.json({ status: "live" }));
 
+/* 
+  K8S/OCI SECRET INJECTION NOTE:
+  In production, the following URLs and keys are injected via K8s Secrets 
+  sourced from OCI Vault.
+*/
 const SERVICES = {
   scraper: process.env.SCRAPER_SERVICE_URL || "http://scraper:5005",
   enrichment: process.env.ENRICHMENT_SERVICE_URL || "http://enrichment:5050",

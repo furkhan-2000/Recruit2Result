@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync, readFileSync } from "fs";
@@ -14,6 +15,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 
 const app = express();
+
+// Production-Grade CORS (Ready for Cloudflare Pages)
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }

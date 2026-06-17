@@ -1,38 +1,16 @@
-# Dependencies
-node_modules/
-
-# Secrets — never commit real credentials
+node_modules
 .env
-.env.*
-!.env.example
-
-# Runtime data & scraped output
-**/output/*
-!**/output/.gitkeep
-**/data/*.sqlite
-**/data/*.sqlite-*
-**/storage/downloads/*
-!**/storage/downloads/.gitkeep
-**/storage/*.db
-**/storage/*.db-*
-
-# Build artifacts (rebuilt on deploy)
-**/dashboard/dist/
-
-# Logs & OS
+.apikey
+data/
+storage/
+output/
+dist/
+.DS_Store
 *.log
 npm-debug.log*
-.DS_Store
-Thumbs.db
-
-# IDE / editor
+yarn-debug.log*
+yarn-error.log*
 .idea/
 .vscode/
-*.swp
-*.swo
-*~
-
-# Puppeteer / Chrome cache (if stored locally)
-.cache/
-.local-chromium/
-.apikey
+*.sqlite
+*.sqlite-journal

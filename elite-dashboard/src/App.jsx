@@ -12,7 +12,6 @@ import {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("command");
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const pipelineStages = [
     { id: "sourced", label: "Sourced", count: 12, color: "blue" },

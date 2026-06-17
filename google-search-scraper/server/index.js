@@ -154,6 +154,12 @@ app.patch("/api/history/:id/remarks", (req, res) => {
 
 app.get("/api/export/csv", (req, res) => {
   const runId = req.query.runId;
+
+  // Security: Validate runId to prevent path traversal
+  if (runId && !/^[0-9a-f-]{8,36}$/i.test(runId)) {
+    return res.status(400).json({ error: "Invalid Run ID format" });
+  }
+
   let results = [];
 
   if (runId) {
@@ -493,5 +499,8 @@ app.listen(PORT, HOST, () => {
   console.log(`Google Search OS API → http://${HOST}:${PORT}`);
   if (!existsSync(dashboardDist)) {
     console.log(`Dashboard dev UI → npm run dashboard:dev (port 5174)`);
+  }
+});
+ → npm run dashboard:dev (port 5174)`);
   }
 });

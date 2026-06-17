@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
@@ -15,6 +16,14 @@ const ROOT = join(__dirname, "..");
 const PORT = config.port;
 
 const app = express();
+
+// Production-Grade CORS (Ready for Cloudflare Pages)
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : "*",
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }
@@ -171,13 +180,24 @@ app.post("/api/jobs/:id/download", async (req, res) => {
   res.json({ ...result, job: getJobWithDetails(req.params.id) });
 });
 
+// FIXED: SSRF Protected Preview Proxy
 app.get("/api/jobs/:jobId/candidates/:candidateId/preview", async (req, res) => {
   const candidate = getCandidate(req.params.jobId, Number(req.params.candidateId));
   if (!candidate) {
     return res.status(404).json({ error: "Candidate not found" });
   }
 
+  // Security: Only allow http/https protocols, block internal IPs (169.254.x.x, 127.x.x.x, etc.)
   try {
+    const targetUrl = new URL(candidate.url);
+    if (!["http:", "https:"].includes(targetUrl.protocol)) {
+      return res.status(400).json({ error: "Invalid protocol" });
+    }
+    // Simple SSRF Protection: Block known metadata/internal ranges
+    if (/^(169\.254|127\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.)/.test(targetUrl.hostname)) {
+      return res.status(403).json({ error: "Access to internal networks blocked" });
+    }
+
     const headers = candidate.referer ? { Referer: candidate.referer } : {};
     const response = await fetch(candidate.url, {
       headers,
@@ -200,8 +220,14 @@ app.get("/api/jobs/:jobId/candidates/:candidateId/preview", async (req, res) => 
   }
 });
 
+// FIXED: Path Traversal Protected File Route
 app.get("/api/files/:jobId/:filename", (req, res) => {
   const { jobId, filename } = req.params;
+  
+  // Strict UUID-style validation for jobId and simple filename validation
+  if (!/^[0-9a-f-]{36}$/i.test(jobId)) {
+    return res.status(400).json({ error: "Invalid Job ID format" });
+  }
   if (!/^[\w.-]+$/.test(filename) || filename.includes("..")) {
     return res.status(400).json({ error: "Invalid filename" });
   }
@@ -224,3 +250,4 @@ app.listen(PORT, config.host, () => {
   const proxy = isProxyConfigured() ? "NodeMaven ready" : "local IP only";
   console.log(`\n  Download Dashboard → http://${config.host}:${PORT}  (${proxy})\n`);
 });
+

@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # API Gateway (Unified Entry Point)
+  gateway:
+    image: nginx:stable-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - orchestrator
+      - hr-finding
+      - google-maps-scraper
+      - google-search-scraper
+      - download-automation
+    networks:
+      - recruit2result-net
+
+  # UI Dashboard (Local Dev)
+  elite-dashboard:
+    build: ./elite-dashboard
+    ports:
+      - "80:80"
+    networks:
+      - recruit2result-net
+
+  # Core Orchestrator
+  orchestrator:
+    build: ./job-scraper-test/services/orchestrator
+    environment:
+      - NODE_ENV=production
+      - SCRAPER_SERVICE_URL=http://scraper:5005
+      - ENRICHMENT_SERVICE_URL=http://enrichment:5050
+      - AI_SWARM_SERVICE_URL=http://ai-swarm:4020
+      - OUTREACH_SERVICE_URL=http://outreach:8881
+    env_file:
+      - .env
+    depends_on:
+      - scraper
+      - enrichment
+      - ai-swarm
+      - outreach
+    networks:
+      - recruit2result-net
+
+  # Job Sourcing Microservices
+  scraper:
+    build: ./job-scraper-test/services/scraper
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  enrichment:
+    build: ./job-scraper-test/services/enrichment
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  ai-swarm:
+    build: ./job-scraper-test/services/ai-swarm
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  outreach:
+    build: ./job-scraper-test/services/outreach
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  # Specialized Scrapers
+  hr-finding:
+    build: ./HR Finding Automation
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  google-maps-scraper:
+    build: ./google-maps-scraper
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  google-search-scraper:
+    build: ./google-search-scraper
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+  download-automation:
+    build: ./Internet Download Automation
+    env_file:
+      - .env
+    networks:
+      - recruit2result-net
+
+networks:
+  recruit2result-net:
+    driver: bridge
