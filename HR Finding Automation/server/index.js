@@ -29,6 +29,10 @@ if (process.env.NODE_ENV === "production") {
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(join(ROOT, "public")));
 
+// --- HEALTH CHECKS ---
+app.get("/healthz", (req, res) => res.json({ status: "ok" }));
+app.get("/livez", (req, res) => res.json({ status: "live" }));
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
 });

@@ -49,6 +49,10 @@ if (process.env.NODE_ENV === "production") {
 }
 app.use(express.json());
 
+// --- HEALTH CHECKS ---
+app.get("/healthz", (req, res) => res.json({ status: "ok" }));
+app.get("/livez", (req, res) => res.json({ status: "live" }));
+
 function clearActiveRun() {
   activeRun = null;
   abortController = null;

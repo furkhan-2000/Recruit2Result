@@ -19,10 +19,14 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 
 WORKDIR /app
 
-COPY package*.json ./
+# Set ownership to node user
+COPY --chown=node:node package*.json ./
 RUN npm install --production
 
-COPY . .
+COPY --chown=node:node . .
 
-EXPOSE 3001
+# Run as non-root user
+USER node
+
+EXPOSE 5005
 CMD ["node", "index.js"]
